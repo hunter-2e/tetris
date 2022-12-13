@@ -217,7 +217,6 @@ vector<vector<int>> spawnPeice(vector<vector<vector<char>>> chosenPeice){
 }
 
 vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords, bool alreadySpawned){
-    displayGrid();
 
     char peiceLetter = grid[peicesCoords[0][0]][peicesCoords[0][1]];
 
