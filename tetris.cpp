@@ -173,6 +173,10 @@ void displayGrid(){
     cout << endl;
 }
 cout << endl;
+
+cout.flush();
+Sleep(1000);
+system("CLS");
 }
 
 vector<vector<vector<char>>> selectRandomPeice(){
@@ -203,9 +207,6 @@ vector<vector<int>> spawnPeice(vector<vector<vector<char>>> chosenPeice){
         }
         //After displaying grid move all peices down of current piece
         if(peicesCoords.size() != 0 && foundMoreLetter){
-            displayGrid();
-            Sleep(100);
-
             vector<vector<int>> newCoords = movePieceDown(peicesCoords, false);
             peicesCoords = newCoords;
         }
@@ -217,16 +218,11 @@ vector<vector<int>> spawnPeice(vector<vector<vector<char>>> chosenPeice){
 
 vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords, bool alreadySpawned){
     displayGrid();
-    
+
     char peiceLetter = grid[peicesCoords[0][0]][peicesCoords[0][1]];
 
     
     for(int i = 0 ; i < peicesCoords.size(); i++){
-        
-        cout << peicesCoords[i][0] << " ";
-        cout << peicesCoords[i][1];
-        cout << endl;
-
         grid[peicesCoords[i][0]][peicesCoords[i][1]] = '*';
         peicesCoords[i][0]++;
         grid[peicesCoords[i][0]][peicesCoords[i][1]] = peiceLetter;
@@ -236,6 +232,7 @@ vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords, bool already
 
     if(count(grid[19].begin(), grid[19].end(), '*') == 10 && alreadySpawned){
         displayGrid();
+
         movePieceDown(peicesCoords, true);
     }
     return peicesCoords;
