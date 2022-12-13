@@ -6,11 +6,13 @@
 #include <time.h>
 #include <vector>
 #include <Windows.h>
+#include <tuple>
 
 using namespace std;
 void populateGrid();
 void displayGrid();
 void spawnPeice(vector<vector<vector<char>>> chosenPeice);
+void movePieceDown(vector<vector<int>> peicesCoords);
 vector<vector<vector<char>>> selectRandomPeice();
 
 enum gridSize { height = 20, width = 10 };
@@ -151,6 +153,7 @@ int main(void){
 
     spawnPeice(chosenPeice);
 
+    displayGrid();
 //    bool reachedBottom = false;
 //    while(reachedBottom == false){
         
@@ -167,6 +170,7 @@ void displayGrid(){
         }
     cout << endl;
 }
+cout << endl;
 }
 
 vector<vector<vector<char>>> selectRandomPeice(){
@@ -179,24 +183,38 @@ vector<vector<vector<char>>> selectRandomPeice(){
 }
 
 void spawnPeice(vector<vector<vector<char>>> chosenPeice){
-    vector<tuple<int,int>> peicesCoords;
+    vector<vector<int>> peicesCoords;
 
     for(int i = chosenPeice[0].size() - 1; i > -1; i--){
         int start = 3;
         for(int j = 0 ; j < chosenPeice[0][i].size() ; j++){
             if(chosenPeice[0][i][j] != '*'){
                 grid[0][start] = chosenPeice[0][i][j];
-                peicesCoords.emplace_back((0, start));
+                vector<int> coord = {0, start};
+                peicesCoords.push_back(coord);
             }  
-            Sleep(100);
-
-            displayGrid();
-
             start++;
         }
-        cout << endl;
+        //After displaying grid move all peices down of current piece
+        if(peicesCoords.size() != 0){
+            displayGrid();
+            Sleep(100);
+            movePieceDown(peicesCoords);
+        }
         
+
     }
+}
+
+void movePieceDown(vector<vector<int>> peicesCoords){
+    char peiceLetter = grid[peicesCoords[0][0]][peicesCoords[0][1]];
+
+    for(int i = 0 ; i < peicesCoords.size(); i++){
+        grid[peicesCoords[i][0]][peicesCoords[i][1]] = '*';
+        peicesCoords[i][0]++;
+        grid[peicesCoords[i][0]][peicesCoords[i][1]] = peiceLetter;
+    }
+
 }
 
 
