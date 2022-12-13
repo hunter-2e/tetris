@@ -2,17 +2,25 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <cstdlib>
+#include <time.h>
+#include <vector>
+#include <Windows.h>
 
 using namespace std;
 void populateGrid();
 void displayGrid();
-
-char grid[20][10];
+void spawnPeice(vector<vector<vector<char>>> chosenPeice);
+vector<vector<vector<char>>> selectRandomPeice();
 
 enum gridSize { height = 20, width = 10 };
 
+vector<char> row(width, '*');
+vector<vector<char>> grid(height, row);
 
-char rightL[4][3][3] = {
+
+
+vector<vector<vector<char>>> rightL = {
     {{'*','*','A'},            
     {'A', 'A', 'A'},
     {'*', '*', '*'}},
@@ -30,7 +38,7 @@ char rightL[4][3][3] = {
     {'*', 'A', '*'}}
 };
 
-char leftL[4][3][3] = {
+vector<vector<vector<char>>> leftL = {
     {{'C','*','*'},            
     {'C', 'C', 'C'},
     {'*', '*', '*'}},
@@ -48,7 +56,7 @@ char leftL[4][3][3] = {
     {'C', 'C', '*'}}
 };
 
-char zig[4][3][3] = {
+vector<vector<vector<char>>> zig = {
     {{'D','D','*'},            
     {'*', 'D', 'D'},
     {'*', '*', '*'}},
@@ -66,7 +74,7 @@ char zig[4][3][3] = {
     {'D', '*', '*'}}
 };
 
-char zag[4][3][3] = {
+vector<vector<vector<char>>> zag = {
     {{'*','E','E'}, 
     {'E', 'E', '*'},
     {'*', '*', '*'}},
@@ -84,7 +92,7 @@ char zag[4][3][3] = {
     {'*', 'E', '*'}}
 };
 
-char tBar[4][3][3] = {
+vector<vector<vector<char>>> tBar = {
     {{'*','F','*'}, 
     {'F', 'F', 'F'},
     {'*', '*', '*'}},
@@ -103,7 +111,7 @@ char tBar[4][3][3] = {
 };
 
 
-char line[4][5][5] = {
+vector<vector<vector<char>>> line = {
     {{'*', '*','*','*', '*'}, 
     {'*', '*', '*', '*', '*'},
     {'*', 'G', 'G', 'G', 'G'},
@@ -129,23 +137,28 @@ char line[4][5][5] = {
     {'*', '*', '*', '*', '*'}},
 };
 
-char square[2][2] = {{'G','G'}, 
-                  {'G', 'G'}};
+vector<vector<vector<char>>> square = 
+                 {{{'G','G'}, 
+                  {'G', 'G'}},
 
-//system("cls");
+                  {{'G','G'}, 
+                  {'G', 'G'}}};
 
 int main(void){
-    populateGrid();
+    vector<vector<vector<char>>> chosenPeice = selectRandomPeice();
+
     displayGrid();
+
+    spawnPeice(chosenPeice);
+
+//    bool reachedBottom = false;
+//    while(reachedBottom == false){
+        
+
+
+//    }
 }
 
-void populateGrid(){
-    for(int i = 0; i < height; i++){
-        for(int j = 0; j < width; j++){
-        grid[i][j] = '*';
-    }
-}
-}
 
 void displayGrid(){
     for(int i = 0; i < height; i++){
@@ -154,6 +167,36 @@ void displayGrid(){
         }
     cout << endl;
 }
+}
+
+vector<vector<vector<char>>> selectRandomPeice(){
+    srand((unsigned)time(NULL));
+    int random = rand() % 7;
+    
+    vector<vector<vector<char>>> possiblePeices[] = {tBar, line, zig, zag, rightL, leftL, square};
+
+    return possiblePeices[random];
+}
+
+void spawnPeice(vector<vector<vector<char>>> chosenPeice){
+    vector<tuple<int,int>> peicesCoords;
+
+    for(int i = chosenPeice[0].size() - 1; i > -1; i--){
+        int start = 3;
+        for(int j = 0 ; j < chosenPeice[0][i].size() ; j++){
+            if(chosenPeice[0][i][j] != '*'){
+                grid[0][start] = chosenPeice[0][i][j];
+                peicesCoords.emplace_back((0, start));
+            }  
+            Sleep(100);
+
+            displayGrid();
+
+            start++;
+        }
+        cout << endl;
+        
+    }
 }
 
 
