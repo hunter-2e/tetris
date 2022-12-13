@@ -7,12 +7,13 @@
 #include <vector>
 #include <Windows.h>
 #include <tuple>
+#include <algorithm>
 
 using namespace std;
 void populateGrid();
 void displayGrid();
 vector<vector<int>> spawnPeice(vector<vector<vector<char>>> chosenPeice);
-vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords);
+vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords, bool alreadySpawned);
 vector<vector<vector<char>>> selectRandomPeice();
 
 enum gridSize { height = 20, width = 10 };
@@ -151,8 +152,8 @@ int main(void){
 
     displayGrid();
 
-    spawnPeice(chosenPeice);
-    
+    vector<vector<int>> spawnedPeice = spawnPeice(chosenPeice);
+    vector<vector<int>> newLocation = movePieceDown(spawnedPeice, true);
 
     displayGrid();
 //    bool reachedBottom = false;
@@ -205,7 +206,7 @@ vector<vector<int>> spawnPeice(vector<vector<vector<char>>> chosenPeice){
             displayGrid();
             Sleep(100);
 
-            vector<vector<int>> newCoords = movePieceDown(peicesCoords);
+            vector<vector<int>> newCoords = movePieceDown(peicesCoords, false);
             peicesCoords = newCoords;
         }
         
@@ -214,7 +215,9 @@ vector<vector<int>> spawnPeice(vector<vector<vector<char>>> chosenPeice){
     return peicesCoords;
 }
 
-vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords){
+vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords, bool alreadySpawned){
+    displayGrid();
+    
     char peiceLetter = grid[peicesCoords[0][0]][peicesCoords[0][1]];
 
     
@@ -231,8 +234,11 @@ vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords){
         
     }
 
+    if(count(grid[19].begin(), grid[19].end(), '*') == 10 && alreadySpawned){
+        displayGrid();
+        movePieceDown(peicesCoords, true);
+    }
     return peicesCoords;
-
 }
 
 
