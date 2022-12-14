@@ -15,6 +15,7 @@ void displayGrid();
 vector<vector<int>> spawnPeice(vector<vector<vector<char>>> chosenPeice);
 vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords, bool alreadySpawned);
 vector<vector<vector<char>>> selectRandomPeice();
+bool canMoveDown(vector<vector<int>> peicesCoords);
 
 enum gridSize { height = 20, width = 10 };
 
@@ -153,6 +154,7 @@ int main(void){
     displayGrid();
 
     vector<vector<int>> spawnedPeice = spawnPeice(chosenPeice);
+    canMoveDown(spawnedPeice);
     vector<vector<int>> newLocation = movePieceDown(spawnedPeice, true);
 
     displayGrid();
@@ -174,9 +176,9 @@ void displayGrid(){
 }
 cout << endl;
 
-cout.flush();
+//cout.flush();
 Sleep(1000);
-system("CLS");
+//system("CLS");
 }
 
 vector<vector<vector<char>>> selectRandomPeice(){
@@ -237,4 +239,32 @@ vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords, bool already
     return peicesCoords;
 }
 
+bool canMoveDown(vector<vector<int>> peicesCoords){
+    vector<vector<int>> maxOfColums;
 
+    for(int i = 0 ; i < peicesCoords.size() ; i++){
+        if(maxOfColums.size() == 0){
+            maxOfColums.push_back(peicesCoords[i]);
+        }
+
+        else{
+            bool toAdd = true;
+
+            for(int j = 0 ; j < maxOfColums.size(); j++){
+                if(maxOfColums[j][1] == peicesCoords[i][1]){
+                    toAdd = false;
+                }
+                if(toAdd && find(maxOfColums.begin(), maxOfColums.end(), peicesCoords[i]) == maxOfColums.end()){
+                    maxOfColums.push_back(peicesCoords[i]);
+                    toAdd = true;
+                }
+            }
+        }
+    }
+
+    for(int i = 0 ; i < maxOfColums.size() ; i++){
+        cout << maxOfColums[i][0] << " " << maxOfColums[i][1];
+        cout << endl;
+    }
+
+}
