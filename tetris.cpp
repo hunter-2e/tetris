@@ -8,6 +8,7 @@
 #include <Windows.h>
 #include <tuple>
 #include <algorithm>
+#include <typeinfo>
 
 using namespace std;
 void populateGrid();
@@ -15,7 +16,8 @@ void displayGrid();
 vector<vector<int>> spawnPeice(vector<vector<vector<char>>> chosenPeice);
 vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords, bool alreadySpawned);
 vector<vector<vector<char>>> selectRandomPeice();
-bool canMoveDown(vector<vector<int>> peicesCoords);
+bool iskeypressed();
+bool canMoveDown(vector<vector<int>> peicesCoords, char peiceLetter);
 
 enum gridSize { height = 20, width = 10 };
 
@@ -142,20 +144,25 @@ vector<vector<vector<char>>> line = {
 };
 
 vector<vector<vector<char>>> square = 
-                 {{{'G','G'}, 
-                  {'G', 'G'}},
+                 {{{'H','H'}, 
+                  {'H', 'H'}},
 
-                  {{'G','G'}, 
-                  {'G', 'G'}}};
+                  {{'H','H'}, 
+                  {'H', 'H'}}};
 
 int main(void){
-    vector<vector<vector<char>>> chosenPeice = selectRandomPeice();
-
     displayGrid();
-
+    cout << iskeypressed();
+    vector<vector<vector<char>>> chosenPeice = selectRandomPeice();
     vector<vector<int>> spawnedPeice = spawnPeice(chosenPeice);
-    canMoveDown(spawnedPeice);
     vector<vector<int>> newLocation = movePieceDown(spawnedPeice, true);
+for(int i = 0 ; i < 5; i++){
+    chosenPeice = selectRandomPeice();
+    spawnedPeice = spawnPeice(chosenPeice);
+    newLocation = movePieceDown(spawnedPeice, true);
+}
+
+    
 
     displayGrid();
 //    bool reachedBottom = false;
@@ -176,9 +183,9 @@ void displayGrid(){
 }
 cout << endl;
 
-//cout.flush();
-Sleep(1000);
-//system("CLS");
+cout.flush();
+Sleep(500);
+system("CLS");
 }
 
 vector<vector<vector<char>>> selectRandomPeice(){
@@ -222,7 +229,6 @@ vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords, bool already
 
     char peiceLetter = grid[peicesCoords[0][0]][peicesCoords[0][1]];
 
-    
     for(int i = 0 ; i < peicesCoords.size(); i++){
         grid[peicesCoords[i][0]][peicesCoords[i][1]] = '*';
         peicesCoords[i][0]++;
@@ -231,40 +237,39 @@ vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords, bool already
         
     }
 
-    if(count(grid[19].begin(), grid[19].end(), '*') == 10 && alreadySpawned){
+    if(alreadySpawned && canMoveDown(peicesCoords, peiceLetter)){
+
         displayGrid();
 
-        movePieceDown(peicesCoords, true);
+        for(int i = 0 ; i < peicesCoords.size(); i ++){
+            cout << peicesCoords[i][0] << " " << peicesCoords[i][1] << endl;       
+        }
+
+        movePieceDown(peicesCoords, alreadySpawned);
     }
     return peicesCoords;
 }
 
-bool canMoveDown(vector<vector<int>> peicesCoords){
-    vector<vector<int>> maxOfColums;
-
-    for(int i = 0 ; i < peicesCoords.size() ; i++){
-        if(maxOfColums.size() == 0){
-            maxOfColums.push_back(peicesCoords[i]);
+bool canMoveDown(vector<vector<int>> peicesCoords, char peiceLetter){
+    for(int i = 0 ; i < peicesCoords.size(); i++){
+        if(peicesCoords[i][0]+1 > 19){
+            cout << "Reached bottom";
+            return false;
         }
-
-        else{
-            bool toAdd = true;
-
-            for(int j = 0 ; j < maxOfColums.size(); j++){
-                if(maxOfColums[j][1] == peicesCoords[i][1]){
-                    toAdd = false;
-                }
-                if(toAdd && find(maxOfColums.begin(), maxOfColums.end(), peicesCoords[i]) == maxOfColums.end()){
-                    maxOfColums.push_back(peicesCoords[i]);
-                    toAdd = true;
-                }
-            }
+        char toCheckBelow = grid[peicesCoords[i][0]+1][peicesCoords[i][1]];
+        
+        if(toCheckBelow != '*' && toCheckBelow != peiceLetter){
+            cout << "BELOW STOPPEd";
+                return false;
         }
     }
-
-    for(int i = 0 ; i < maxOfColums.size() ; i++){
-        cout << maxOfColums[i][0] << " " << maxOfColums[i][1];
-        cout << endl;
-    }
-
+    return true;
 }
+
+bool iskeypressed()
+  {
+  return WaitForSingleObject(
+    GetStdHandle( STD_INPUT_HANDLE ),
+    0
+    ) == WAIT_OBJECT_0;
+  }
