@@ -9,6 +9,7 @@
 #include <tuple>
 #include <algorithm>
 #include <typeinfo>
+#include <conio.h>
 
 using namespace std;
 void populateGrid();
@@ -16,7 +17,6 @@ void displayGrid();
 vector<vector<int>> spawnPeice(vector<vector<vector<char>>> chosenPeice);
 vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords, bool alreadySpawned);
 vector<vector<vector<char>>> selectRandomPeice();
-bool iskeypressed();
 bool canMoveDown(vector<vector<int>> peicesCoords, char peiceLetter);
 
 enum gridSize { height = 20, width = 10 };
@@ -152,11 +152,11 @@ vector<vector<vector<char>>> square =
 
 int main(void){
     displayGrid();
-    cout << iskeypressed();
+    cout << getch();
     vector<vector<vector<char>>> chosenPeice = selectRandomPeice();
     vector<vector<int>> spawnedPeice = spawnPeice(chosenPeice);
     vector<vector<int>> newLocation = movePieceDown(spawnedPeice, true);
-for(int i = 0 ; i < 5; i++){
+for(int i = 0 ; i < 7; i++){
     chosenPeice = selectRandomPeice();
     spawnedPeice = spawnPeice(chosenPeice);
     newLocation = movePieceDown(spawnedPeice, true);
@@ -265,11 +265,3 @@ bool canMoveDown(vector<vector<int>> peicesCoords, char peiceLetter){
     }
     return true;
 }
-
-bool iskeypressed()
-  {
-  return WaitForSingleObject(
-    GetStdHandle( STD_INPUT_HANDLE ),
-    0
-    ) == WAIT_OBJECT_0;
-  }
