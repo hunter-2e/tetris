@@ -5,19 +5,23 @@
 #include <cstdlib>
 #include <time.h>
 #include <vector>
-#include <Windows.h>
+//#include <Windows.h>
 #include <tuple>
 #include <algorithm>
-#include <typeinfo>
-#include <conio.h>
+//#include <conio.h>
+#include <future>
+#include <thread>
+#include <unistd.h>
+#include <ncurses.h>
+//#include <boost/thread.hpp>
 
 using namespace std;
-void populateGrid();
 void displayGrid();
-vector<vector<int>> spawnPeice(vector<vector<vector<char>>> chosenPeice);
-vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords, bool alreadySpawned);
-vector<vector<vector<char>>> selectRandomPeice();
-bool canMoveDown(vector<vector<int>> peicesCoords, char peiceLetter);
+vector<vector<int>> spawnpiece(vector<vector<vector<char>>> chosenpiece);
+vector<vector<int>> movePieceDown(vector<vector<int>> piecesCoords, bool alreadySpawned);
+vector<vector<vector<char>>> selectRandompiece();
+vector<vector<int>> controller(char pieceLetter, char pressed, vector<vector<int>> piecesCoords);
+bool canMoveDown(vector<vector<int>> piecesCoords, char pieceLetter);
 
 enum gridSize { height = 20, width = 10 };
 
@@ -151,117 +155,161 @@ vector<vector<vector<char>>> square =
                   {'H', 'H'}}};
 
 int main(void){
+    initscr();
+    nodelay(stdscr, true);
+    //keypad(stdscr, true);
+    //noecho();
+    //curs_set(0);
     displayGrid();
-    cout << getch();
-    vector<vector<vector<char>>> chosenPeice = selectRandomPeice();
-    vector<vector<int>> spawnedPeice = spawnPeice(chosenPeice);
-    vector<vector<int>> newLocation = movePieceDown(spawnedPeice, true);
-for(int i = 0 ; i < 7; i++){
-    chosenPeice = selectRandomPeice();
-    spawnedPeice = spawnPeice(chosenPeice);
-    newLocation = movePieceDown(spawnedPeice, true);
-}
+
+    vector<vector<vector<char>>> chosenpiece = selectRandompiece();
+    vector<vector<int>> spawnedpiece = spawnpiece(chosenpiece);
+    vector<vector<int>> newLocation = movePieceDown(spawnedpiece, true);
+
+    displayGrid();
+    //endwin();
+    }
 
     
 
-    displayGrid();
-//    bool reachedBottom = false;
-//    while(reachedBottom == false){
-        
-
-
-//    }
-}
 
 
 void displayGrid(){
     for(int i = 0; i < height; i++){
         for(int j = 0; j < width; j++){
-            cout << grid[i][j] << " ";
+            mvprintw(i, j, "%c ", grid[i][j]);
         }
-    cout << endl;
+    mvprintw(i, width-1, "\n");
 }
-cout << endl;
-
-cout.flush();
-Sleep(500);
-system("CLS");
+refresh();
+usleep(500000);
 }
 
-vector<vector<vector<char>>> selectRandomPeice(){
+vector<vector<vector<char>>> selectRandompiece(){
     srand((unsigned)time(NULL));
     int random = rand() % 7;
     
-    vector<vector<vector<char>>> possiblePeices[] = {tBar, line, zig, zag, rightL, leftL, square};
+    vector<vector<vector<char>>> possiblepieces[] = {tBar, line, zig, zag, rightL, leftL, square};
 
-    return possiblePeices[random];
+    return possiblepieces[random];
 }
 
-vector<vector<int>> spawnPeice(vector<vector<vector<char>>> chosenPeice){
-    vector<vector<int>> peicesCoords;
+vector<vector<int>> spawnpiece(vector<vector<vector<char>>> chosenpiece){
+    vector<vector<int>> piecesCoords;
 
-    for(int i = chosenPeice[0].size() - 1; i > -1; i--){
+    for(int i = chosenpiece[0].size() - 1; i > -1; i--){
         int start = 3;
         bool foundMoreLetter = false;
 
-        for(int j = 0 ; j < chosenPeice[0][i].size() ; j++){
-            if(chosenPeice[0][i][j] != '*'){
-                grid[0][start] = chosenPeice[0][i][j];
+        for(int j = 0 ; j < chosenpiece[0][i].size() ; j++){
+            if(chosenpiece[0][i][j] != '*'){
+                grid[0][start] = chosenpiece[0][i][j];
                 vector<int> coord = {0, start};
-                peicesCoords.push_back(coord);
+                piecesCoords.push_back(coord);
 
                 foundMoreLetter = true;
             }  
             start++;
         }
-        //After displaying grid move all peices down of current piece
-        if(peicesCoords.size() != 0 && foundMoreLetter){
-            vector<vector<int>> newCoords = movePieceDown(peicesCoords, false);
-            peicesCoords = newCoords;
+        //After displaying grid move all pieces down of current piece
+        if(piecesCoords.size() != 0 && foundMoreLetter){
+            vector<vector<int>> newCoords = movePieceDown(piecesCoords, false);
+            piecesCoords = newCoords;
         }
         
 
     }
-    return peicesCoords;
+    return piecesCoords;
 }
 
-vector<vector<int>> movePieceDown(vector<vector<int>> peicesCoords, bool alreadySpawned){
+vector<vector<int>> movePieceDown(vector<vector<int>> piecesCoords, bool alreadySpawned){
+    char pieceLetter = grid[piecesCoords[0][0]][piecesCoords[0][1]];
+    
+    piecesCoords = controller(pieceLetter, getch(), piecesCoords);
+    refresh();
+    
 
-    char peiceLetter = grid[peicesCoords[0][0]][peicesCoords[0][1]];
-
-    for(int i = 0 ; i < peicesCoords.size(); i++){
-        grid[peicesCoords[i][0]][peicesCoords[i][1]] = '*';
-        peicesCoords[i][0]++;
-        grid[peicesCoords[i][0]][peicesCoords[i][1]] = peiceLetter;
+    for(int i = 0 ; i < piecesCoords.size(); i++){
+        grid[piecesCoords[i][0]][piecesCoords[i][1]] = '*';
+        piecesCoords[i][0]++;
+        grid[piecesCoords[i][0]][piecesCoords[i][1]] = pieceLetter;
         
         
     }
 
-    if(alreadySpawned && canMoveDown(peicesCoords, peiceLetter)){
+    if(alreadySpawned && canMoveDown(piecesCoords, pieceLetter)){
 
         displayGrid();
-
-        for(int i = 0 ; i < peicesCoords.size(); i ++){
-            cout << peicesCoords[i][0] << " " << peicesCoords[i][1] << endl;       
-        }
-
-        movePieceDown(peicesCoords, alreadySpawned);
+        movePieceDown(piecesCoords, alreadySpawned);
     }
-    return peicesCoords;
+    return piecesCoords;
 }
 
-bool canMoveDown(vector<vector<int>> peicesCoords, char peiceLetter){
-    for(int i = 0 ; i < peicesCoords.size(); i++){
-        if(peicesCoords[i][0]+1 > 19){
-            cout << "Reached bottom";
+bool canMoveDown(vector<vector<int>> piecesCoords, char pieceLetter){
+    for(int i = 0 ; i < piecesCoords.size(); i++){
+        if(piecesCoords[i][0]+1 > 19){
             return false;
         }
-        char toCheckBelow = grid[peicesCoords[i][0]+1][peicesCoords[i][1]];
-        
-        if(toCheckBelow != '*' && toCheckBelow != peiceLetter){
-            cout << "BELOW STOPPEd";
+        char toCheckBelowEmpty = grid[piecesCoords[i][0]+1][piecesCoords[i][1]];
+        vector<int> toCheckBelowSame = {piecesCoords[i][0]+1, piecesCoords[i][1]};
+
+        if(toCheckBelowEmpty != '*' && find(piecesCoords.begin(), piecesCoords.end(), toCheckBelowSame) == piecesCoords.end()){
                 return false;
         }
     }
     return true;
+}
+
+vector<vector<int>> controller(char pieceLetter, char pressed, vector<vector<int>> piecesCoords){
+    vector<vector<int>> changedCoords;
+
+    switch(pressed){
+    case 'a':
+        for(int i = 0 ; i < piecesCoords.size(); i++){
+            if(piecesCoords[i][1]-1 < 0){
+                cout << "DIDNT WORKa";
+                return piecesCoords;
+            }
+        }
+
+        for(int i = 0 ; i < piecesCoords.size(); i++){
+                grid[piecesCoords[i][0]][piecesCoords[i][1]] = '*';
+                piecesCoords[i][1]--;
+                grid[piecesCoords[i][0]][piecesCoords[i][1]] = pieceLetter;
+        }
+
+        break;
+    case 'w':
+        cout << "up";
+        break;
+    case 'd':
+        for(int i = 0 ; i < piecesCoords.size(); i++){
+            if(piecesCoords[i][1]+1 > 8){
+                return piecesCoords;
+            }
+        }
+
+        for(int i = 0 ; i < piecesCoords.size(); i++){
+            grid[piecesCoords[i][0]][piecesCoords[i][1]] = '*';
+            piecesCoords[i][1]++;
+            grid[piecesCoords[i][0]][piecesCoords[i][1]] = pieceLetter;
+        }
+
+        break;
+    case 's':
+        for(int i = 0 ; i < piecesCoords.size(); i++){
+            if(piecesCoords[i][0]+1 > 19){
+                return piecesCoords;
+            }
+        }
+
+        for(int i = 0 ; i < piecesCoords.size(); i++){
+            grid[piecesCoords[i][0]][piecesCoords[i][1]] = '*';
+            piecesCoords[i][0]++;
+            grid[piecesCoords[i][0]][piecesCoords[i][1]] = pieceLetter;
+        }
+        break;
+}
+
+return piecesCoords;
 }
