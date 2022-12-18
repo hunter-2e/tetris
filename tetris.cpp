@@ -156,25 +156,33 @@ vector<vector<vector<char>>> square =
 
 int main(void){
     initscr();
+    start_color();
+
+    init_pair(1, COLOR_RED, COLOR_RED);
+    init_pair(2, COLOR_GREEN, COLOR_GREEN);
+    init_pair(3, COLOR_YELLOW, COLOR_YELLOW);
+    init_pair(4, COLOR_CYAN, COLOR_CYAN);
+    init_pair(5, COLOR_MAGENTA, COLOR_MAGENTA);
+    init_pair(6, COLOR_WHITE, COLOR_WHITE);
+    init_pair(7, COLOR_BLUE, COLOR_BLUE);
+
     nodelay(stdscr, true);
     keypad(stdscr, true);
     noecho();
     curs_set(0);
     displayGrid();
 
+    
 
-    vector<vector<vector<char>>> chosenpiece = selectRandompiece();
-    vector<vector<int>> spawnedpiece = spawnpiece(chosenpiece);
-    vector<vector<int>> newLocation = movePieceDown(spawnedpiece, true);
-
-    for(int i =0; i< 7; i++){
-    chosenpiece = selectRandompiece();
-    spawnedpiece = spawnpiece(chosenpiece);
-    newLocation = movePieceDown(spawnedpiece, true);
+    while(1){
+        vector<vector<vector<char>>> chosenpiece = selectRandompiece();
+        vector<vector<int>> spawnedpiece = spawnpiece(chosenpiece);
+        vector<vector<int>> newLocation = movePieceDown(spawnedpiece, true);
     }
     displayGrid();
-    //endwin();
+    endwin();
     }
+  
 
     
 
@@ -183,12 +191,42 @@ int main(void){
 void displayGrid(){
     for(int i = 0; i < height; i++){
         for(int j = 0; j < width; j++){
-            mvprintw(i, j, "%c ", grid[i][j]);
+            int color;
+
+            switch(grid[i][j]){
+                case 'A':
+                    color = 1;
+                    break;
+                case 'C':
+                    color = 2;
+                    break;
+                case 'D':
+                    color = 3;
+                    break;
+                case 'E':
+                    color = 4;
+                    break;
+                case 'F':
+                    color = 5;
+                    break;
+                case 'G':
+                    color = 7;
+                    break;
+                case 'H':
+                    color = 4;
+                    break;
+                default:
+                    color = 6;
+                    break;
+            }
+            attron(COLOR_PAIR(color));
+            mvprintw(i, j*3, "   ");
+            attroff(COLOR_PAIR(color));
         }
-    mvprintw(i, width-1, "\n");
+    mvprintw(i, (width-1)*3, "\n");
 }
 refresh();
-usleep(500000);
+usleep(50000);
 }
 
 vector<vector<vector<char>>> selectRandompiece(){
@@ -201,6 +239,7 @@ vector<vector<vector<char>>> selectRandompiece(){
 }
 
 vector<vector<int>> spawnpiece(vector<vector<vector<char>>> chosenpiece){
+    
     vector<vector<int>> piecesCoords;
 
     for(int i = chosenpiece[0].size() - 1; i > -1; i--){
@@ -209,6 +248,9 @@ vector<vector<int>> spawnpiece(vector<vector<vector<char>>> chosenpiece){
 
         for(int j = 0 ; j < chosenpiece[0][i].size() ; j++){
             if(chosenpiece[0][i][j] != '*'){
+                if(grid[0][start] != '*'){
+                    exit(1);
+                }
                 grid[0][start] = chosenpiece[0][i][j];
                 vector<int> coord = {0, start};
                 piecesCoords.push_back(coord);
@@ -218,7 +260,8 @@ vector<vector<int>> spawnpiece(vector<vector<vector<char>>> chosenpiece){
             start++;
         }
         //After displaying grid move all pieces down of current piece
-        if(piecesCoords.size() != 0 && foundMoreLetter){
+        if(piecesCoords.size() != 0 && foundMoreLetter && canMoveDown(piecesCoords, grid[piecesCoords[0][0]][piecesCoords[0][1]])){
+            displayGrid();
             vector<vector<int>> newCoords = movePieceDown(piecesCoords, false);
             piecesCoords = newCoords;
         }
@@ -277,7 +320,7 @@ vector<vector<int>> controller(char pieceLetter, char pressed, vector<vector<int
     switch(pressed){
     case 'a':
         for(int i = 0 ; i < piecesCoords.size(); i++){
-            if(piecesCoords[i][1]-1 < 0){
+            if(piecesCoords[i][1]-1 < 0 || (grid[piecesCoords[i][0]][piecesCoords[i][1]-1] != '*' && grid[piecesCoords[i][0]][piecesCoords[i][1]-1] != pieceLetter)){
                 return piecesCoords;
             }
         }
@@ -322,7 +365,7 @@ vector<vector<int>> controller(char pieceLetter, char pressed, vector<vector<int
         return piecesCoords;
     case 'd':
         for(int i = 0 ; i < piecesCoords.size(); i++){
-            if(piecesCoords[i][1]+1 > 8){
+            if(piecesCoords[i][1]+1 > 8 || (grid[piecesCoords[i][0]][piecesCoords[i][1]+1] != '*' && grid[piecesCoords[i][0]][piecesCoords[i][1]+1] != pieceLetter)){
                 return piecesCoords;
             }
         }
@@ -334,6 +377,10 @@ vector<vector<int>> controller(char pieceLetter, char pressed, vector<vector<int
         }
         return piecesCoords;
     case 's':
+        if(!canMoveDown(piecesCoords, pieceLetter)){
+            return piecesCoords;
+        }
+
         for(int i = 0 ; i < piecesCoords.size(); i++){
             if(piecesCoords[i][0]+1 > 18){
                 return piecesCoords;
