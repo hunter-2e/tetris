@@ -178,6 +178,16 @@ int main(void){
         vector<vector<vector<char>>> chosenpiece = selectRandompiece();
         vector<vector<int>> spawnedpiece = spawnpiece(chosenpiece);
         vector<vector<int>> newLocation = movePieceDown(spawnedpiece, true);
+
+        for(int x = 0; x < height; x++){
+            if(find(grid[x].begin(), grid[x].end(), '*') == grid[x].end()){
+                for(int y = 0; y < width; y++){
+                    grid[x][y] = '*';
+                }
+                displayGrid();
+            }
+            
+        }
     }
     displayGrid();
     endwin();
@@ -223,10 +233,10 @@ void displayGrid(){
             mvprintw(i, j*3, "   ");
             attroff(COLOR_PAIR(color));
         }
-    mvprintw(i, (width-1)*3, "\n");
+    mvprintw(i, (width)*3, "\n");
 }
 refresh();
-usleep(50000);
+usleep(100000);
 }
 
 vector<vector<vector<char>>> selectRandompiece(){
@@ -350,7 +360,7 @@ vector<vector<int>> controller(char pieceLetter, char pressed, vector<vector<int
             rotated[0] += originX;
             rotated[1] += originY;
             
-            if(rotated[0] > 18 || rotated[1] > 8 || rotated[1] < 0){
+            if(rotated[0] > 19 || rotated[1] > 9 || rotated[1] < 0){
                 exit(1);
             }
             
@@ -365,7 +375,7 @@ vector<vector<int>> controller(char pieceLetter, char pressed, vector<vector<int
         return piecesCoords;
     case 'd':
         for(int i = 0 ; i < piecesCoords.size(); i++){
-            if(piecesCoords[i][1]+1 > 8 || (grid[piecesCoords[i][0]][piecesCoords[i][1]+1] != '*' && grid[piecesCoords[i][0]][piecesCoords[i][1]+1] != pieceLetter)){
+            if(piecesCoords[i][1]+1 > 9 || (grid[piecesCoords[i][0]][piecesCoords[i][1]+1] != '*' && grid[piecesCoords[i][0]][piecesCoords[i][1]+1] != pieceLetter)){
                 return piecesCoords;
             }
         }
@@ -382,7 +392,7 @@ vector<vector<int>> controller(char pieceLetter, char pressed, vector<vector<int
         }
 
         for(int i = 0 ; i < piecesCoords.size(); i++){
-            if(piecesCoords[i][0]+1 > 18){
+            if(piecesCoords[i][0]+1 > 19){
                 return piecesCoords;
             }
         }
